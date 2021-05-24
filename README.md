@@ -13,6 +13,7 @@ Most commercial “cloud security” scanners that aim to detect malware in clou
 1.	Just-in-time installation of an agent via SSH
 2.	Running the agent from /tmp
 3.	Deleting themselves once the scan completes
+
 This results in the security agent stealing compute cycles and I/O from the host it’s scanning, which is veritably unstonkly – as is the chance that prod is borked if the agent screws up.
 
 Patrolaroid avoids these problems by scanning prod instances for security problems while staying safely out of prod. After the engineer or admin provides the ID of the volume they want to scan, Patrolaroid then:
