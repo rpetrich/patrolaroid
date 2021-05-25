@@ -1,10 +1,12 @@
+![patrolaroid-logo-smol](https://user-images.githubusercontent.com/18424886/119518450-831cdf80-bd46-11eb-890b-f8f0faffdd8b.png)
+
 # Patrolaroid
 Patrolaroid is an instant camera for capturing cloud workload risks. It’s a prod-friendly scanner that makes finding security issues in AWS instances less annoying and disruptive for software engineers and cloud admins. 
 
 Patrolaroid scans production infrastructure from a safe distance rather than within production, so you don’t have to install an agent, run code, or perform other invasive infosec rituals to use it.
 
 ## Overview
-Patrolaroid snapshots AWS instances to uncover malware, misconfigurations, leaked secrets, vulnerabilities, and other security snafus that you probably don’t want in your prod. Software engineers, security engineers, and cloud administrators only need familiarity with YARA and AWS instance IDs to use it. 
+Patrolaroid snapshots AWS instances to uncover malware that you probably don’t want in your prod. Software engineers, security engineers, and cloud administrators only need familiarity with YARA and AWS instance IDs to use it. 
 
 Patrolaroid does not require running an agent or code in prod, only needs read-only access, and generally avoids the myriad stability and performance sins of security tools. 
 
