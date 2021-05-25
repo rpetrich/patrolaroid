@@ -1,6 +1,11 @@
-![patrolaroid-logo-smol](https://user-images.githubusercontent.com/18424886/119518450-831cdf80-bd46-11eb-890b-f8f0faffdd8b.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/18424886/119518450-831cdf80-bd46-11eb-890b-f8f0faffdd8b.png" width="256" height="256">
+</p>
 
-# Patrolaroid
+<h1 align="center">Patrolaroid</h1>
+
+<br/>
+
 Patrolaroid is an instant camera for capturing cloud workload risks. It’s a prod-friendly scanner that makes finding security issues in AWS instances less annoying and disruptive for software engineers and cloud admins. 
 
 Patrolaroid scans production infrastructure from a safe distance rather than within production, so you don’t have to install an agent, run code, or perform other invasive infosec rituals to use it.
@@ -10,7 +15,8 @@ Patrolaroid snapshots AWS instances to uncover malware that you probably don’t
 
 Patrolaroid does not require running an agent or code in prod, only needs read-only access, and generally avoids the myriad stability and performance sins of security tools. 
 
-## How it’s different
+## Why?
+### The tired way
 Most commercial “cloud security” scanners that aim to detect malware in cloud workloads ironically operate pretty similarly to malware. Their mode of operation is:
 1.	Just-in-time installation of an agent via SSH
 2.	Running the agent from /tmp
@@ -18,6 +24,7 @@ Most commercial “cloud security” scanners that aim to detect malware in clou
 
 This results in the security agent stealing compute cycles and I/O from the host it’s scanning, which is veritably unstonkly – as is the chance that prod is borked if the agent screws up.
 
+### The inspired way
 Patrolaroid avoids these problems by scanning prod instances for security problems while staying safely out of prod. After the engineer or admin provides the ID of the volume they want to scan, Patrolaroid then:
 1.	Runs from an AWS instance within the same account as the specified instance
 2.	Snapshots the specified instance
