@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -324,8 +325,37 @@ wait_for_volume_completion:
 	if err != nil {
 		return fmt.Errorf("failed to mount device: %v", err)
 	}
-	log.Printf("mounted successfully")
-	// scan the mount
+	log.Printf("mounted successfully, scanning")
+	// set up the background scanners
+	var wg sync.WaitGroup
+	pathsToScan := make(chan string, 1024)
+	for i := 0; i < 8; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for recursivePath := range pathsToScan {
+				// Actually scan the file
+				var m yara.MatchRules
+				if err := rules.ScanFile(recursivePath, 0, 0, &m); err != nil {
+					errorText := err.Error()
+					// Ignore bad symlinks and unlink race conditions. Have to
+					// compare by string since go-yara doesn't use structured error
+					// types :(
+					if errorText != "could not open file" && errorText != "could not map file" {
+						log.Printf("could not file in volume %s at path %q: %v", volumeId, strings.TrimPrefix(recursivePath, "snapshot"), err)
+					}
+				} else {
+					// If we have matches, dispatch an alert
+					if len(m) != 0 {
+						for _, match := range m {
+							log.Printf("file in volume %s at path %q violated rule %q from %q", volumeId, strings.TrimPrefix(recursivePath, "snapshot"), match.Rule, match.Namespace)
+						}
+					}
+				}
+			}
+		}()
+	}
+	// search for files
 	err = filepath.Walk("./snapshot", func(recursivePath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
@@ -337,28 +367,14 @@ wait_for_volume_completion:
 		if info.Mode()&(os.ModeDevice|os.ModeNamedPipe|os.ModeSocket|os.ModeCharDevice|os.ModeSymlink) != 0 {
 			return nil
 		}
-		// Actually scan the file
-		var m yara.MatchRules
-		err = rules.ScanFile(recursivePath, 0, 0, &m)
-		if err != nil {
-			errorText := err.Error()
-			// Ignore bad symlinks and unlink race conditions. Have to
-			// compare by string since go-yara doesn't use structured error
-			// types :(
-			if errorText != "could not open file" && errorText != "could not map file" {
-				log.Printf("could not scan %q: %v", recursivePath, err)
-			}
-			return nil
-		}
-		// If we have matches, dispatch an alert
-		if len(m) != 0 {
-			log.Printf("file in volume %s at path %q violated rule %q from %q", volumeId, strings.TrimPrefix(recursivePath, "snapshot"), m[0].Rule, m[0].Namespace)
-		}
+		pathsToScan <- recursivePath
 		return nil
 	})
 	if err != nil {
 		log.Printf("error scanning: %v", err)
 	}
+	close(pathsToScan)
+	wg.Wait()
 	log.Printf("finished scanning, unmounting")
 	// unmount the volume
 	syscall.Unmount("./snapshot", 0)
