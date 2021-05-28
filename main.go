@@ -342,7 +342,7 @@ wait_for_volume_completion:
 					// compare by string since go-yara doesn't use structured error
 					// types :(
 					if errorText != "could not open file" && errorText != "could not map file" {
-						log.Printf("could not file in volume %s at path %q: %v", volumeId, strings.TrimPrefix(recursivePath, "snapshot"), err)
+						log.Printf("could not scan file in volume %s at path %q: %v", volumeId, strings.TrimPrefix(recursivePath, "snapshot"), err)
 					}
 				} else {
 					// If we have matches, dispatch an alert
