@@ -40,7 +40,7 @@ All you need is an AWS account and the ability to create an AWS role and EC2 ins
 
 ## Step 1: Create an AWS role
 1. Log into your AWS account and access the Identity and Access Management (IAM) service in the AWS Management Console, then choose [**Create Role**](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-service.html) (you can also use the AWS CLI if you prefer)
-> Make sure to use the account and availability zone you want to scan to create the role
+:cloud: Make sure to use the account and availability zone you want to scan to create the role
 2. Select **AWS service** for type of trusted entity
 3. Select **EC2** as the allowed service and use case, then choose **Next: Permissions**
 4. Select the [**AmazonEC2FullAccess**](https://console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn%3Aaws%3Aiam%3A%3Aaws%3Apolicy%2FAmazonEC2FullAccess) policy, then choose **Next: Tags**
@@ -49,7 +49,7 @@ All you need is an AWS account and the ability to create an AWS role and EC2 ins
 7. Review the role and, if satisfied, choose **Create role**
 
 ## Step 2: Create an EC2 instance
-> Make sure you’re still logged into the account you want to scan before proceeding
+:cloud: Make sure you’re still logged into the account you want to scan before proceeding
 1. Open the [AWS EC2 console](https://console.aws.amazon.com/ec2/), then choose **Launch instance**
 2. On the Step 1: Choose an Amazon Machine Image (AMI) page, select **Ubuntu Server 20.04 LTS (HVM), SSD Volume Type**
 3. On the Step 2: Choose an Instance Type page, select the **t2.micro** type, then click **Next: Configure Instance Details**
@@ -57,36 +57,35 @@ All you need is an AWS account and the ability to create an AWS role and EC2 ins
 5. Click **Review and Launch**
 
 ## Step 3: Install dependencies
-1. [Connect to your EC2 instance via SSH](https://docs.aws.amazon.com/quickstarts/latest/vmlaunch/step-2-connect-to-instance.html) (if using Linux or Mac) or PuTTY if using Windows
+1. [Connect to your new EC2 instance via SSH](https://docs.aws.amazon.com/quickstarts/latest/vmlaunch/step-2-connect-to-instance.html) (if using Linux or Mac) or PuTTY if using Windows
 2. Install `gcc` and other package dependencies by running the command:
 ```
 sudo apt-get install curl git make gcc build-essential
 ```
-3. Download `golang` by running 
+3. Download and install `golang` by running:
 ```
-curl -OL [https://golang.org/dl/go1.16.4.linux-amd64.tar.gz](https://golang.org/dl/go1.16.4.linux-amd64.tar.gz)
+curl -OL https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
 ```
-4. Install `golang` by running:
+and then:
 ```
-	sudo bash -c 'rm -rf /usr/local/go && tar -C /usr/local -xzf go1.16.4.linux-amd64.tar.gz'
-	export PATH=$PATH:/usr/local/go/bin
-	echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
-	sudo chown -R $USER /go
+sudo bash -c 'rm -rf /usr/local/go && tar -C /usr/local -xzf go1.16.4.linux-amd64.tar.gz'
+export PATH=$PATH:/usr/local/go/bin
+echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
+sudo chown -R $USER /go
 ```
 
 ## Step 4: Install Patrolaroid
-1. [Connect to your EC2 instance via SSH](https://docs.aws.amazon.com/quickstarts/latest/vmlaunch/step-2-connect-to-instance.html) (if using Linux or Mac) or PuTTY if using Windows
-2. Clone Patrolaroid to your instance by running:
+Ensure you are connected to your dedicated EC2 instance and then clone Patrolaroid to it:
 ```
-[git clone https://github.com/rpetrich/patrolaroid.git](https://github.com/rpetrich/patrolaroid.git)
+git clone https://github.com/rpetrich/patrolaroid.git
 ```
-3. Build Patrolaroid by running:
+Then build Patrolaroid by running:
 ```
 pushd patrolaroid && make && popd
 ```
 
 ## Step 5: Run Patrolaroid
-1. Navigate to the Patrolaroid directory and start it by running:
+Navigate to the Patrolaroid directory and start it:
 ```
 cd patrolaroid
 sudo ./patrolaroid
