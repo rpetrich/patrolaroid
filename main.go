@@ -329,7 +329,7 @@ wait_for_volume_completion:
 	// set up the background scanners
 	var wg sync.WaitGroup
 	pathsToScan := make(chan string, 1024)
-	for i := 0; i < 16; i++ {
+	for i := 0; i < 64; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
