@@ -58,36 +58,19 @@ All you need is an AWS account and the ability to create an AWS role and EC2 ins
 
 ## Step 3: Install dependencies
 1. [Connect to your new EC2 instance via SSH](https://docs.aws.amazon.com/quickstarts/latest/vmlaunch/step-2-connect-to-instance.html) (or PuTTY if using Windows)
-2. Install `gcc` and other package dependencies by running the command:
+2. Install `curl` by running the command:
 ```
-sudo apt-get install curl git make gcc build-essential
-```
-3. Download and install `golang` by running:
-```
-curl -OL https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
-```
-and then:
-```
-sudo bash -c 'rm -rf /usr/local/go && tar -C /usr/local -xzf go1.16.4.linux-amd64.tar.gz'
-export PATH=$PATH:/usr/local/go/bin
-echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
-sudo chown -R $USER /go
-```
+sudo apt-get install curl
 
 ## Step 4: Install Patrolaroid
-Ensure you are connected to your dedicated EC2 instance and then clone Patrolaroid to it:
+Ensure you are connected to your dedicated EC2 instance and then download Patrolaroid to it:
 ```
-git clone https://github.com/rpetrich/patrolaroid.git
-```
-Then build Patrolaroid by running:
-```
-pushd patrolaroid && make && popd
+curl -L https://github.com/rpetrich/patrolaroid/releases/download/v0.2/patrolaroid.tar.gz | tar xz
 ```
 
 ## Step 5: Run Patrolaroid
-Navigate to the Patrolaroid directory and start it:
+Start it via `sudo`:
 ```
-cd patrolaroid
 sudo ./patrolaroid
 ```
 Enjoy your :cloud: :lock: :camera:
