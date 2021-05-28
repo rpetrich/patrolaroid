@@ -196,7 +196,7 @@ wait_for_snapshot_completion:
 		}
 		time.Sleep(10 * time.Second)
 	}
-	iops := int32(3000)
+	iops := int32(6000)
 	createVolumeResponse, err := client.CreateVolume(ctx, &ec2.CreateVolumeInput{
 		AvailabilityZone: &az,
 		SnapshotId:       &snapshotId,
@@ -329,7 +329,7 @@ wait_for_volume_completion:
 	// set up the background scanners
 	var wg sync.WaitGroup
 	pathsToScan := make(chan string, 1024)
-	for i := 0; i < 8; i++ {
+	for i := 0; i < 16; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
