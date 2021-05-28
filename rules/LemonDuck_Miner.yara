@@ -2,7 +2,7 @@ rule LemonDuck_Miner
 {
     meta:
         Author = "Kelly Shortridge"
-        Repo = "https://github.com/rpetrich/patrolaroid/rules"
+        Repo = "https://github.com/rpetrich/patrolaroid/tree/main/rules"
         description = "Strings related to the Lemon Duck Miner"
         ref1 = "https://github.com/sophoslabs/IoCs/blob/master/Trojan-LDMiner.csv"
 
