@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/18424886/119518450-831cdf80-bd46-11eb-890b-f8f0faffdd8b.png" width="256" height="256">
+  <img src="logo.png" width="256" height="256">
 </p>
 
 <h1 align="center">Patrolaroid</h1>
