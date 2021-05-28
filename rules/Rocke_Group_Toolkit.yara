@@ -2,7 +2,7 @@ rule Rocke_Groupe_Toolkit
 {
     meta:
         Author = "Kelly Shortridge"
-        Repo = "https://github.com/rpetrich/patrolaroid/rules"
+        Repo = "https://github.com/rpetrich/patrolaroid/tree/main/rules"
         description = "Strings related to the Rocke Group's toolkit"
         ref1 = "https://unit42.paloaltonetworks.com/malware-used-by-rocke-group-evolves-to-evade-detection-by-cloud-security-products/"
 
