@@ -15,8 +15,8 @@ Patrolaroid snapshots AWS instances to uncover malware, backdoors, cryptominers,
 
 Patrolaroid does not require running an agent or code in prod, only needs read-only access, and generally avoids the myriad stability and performance sins of security tools. 
 
-### Why?
-#### The tired way
+## Why?
+### The tired way
 Most commercial “cloud security” scanners that aim to detect malware in cloud workloads ironically operate pretty similarly to malware. Their mode of operation is:
 1.	Just-in-time installation of an agent via SSH
 2.	Running the agent from /tmp
@@ -24,7 +24,7 @@ Most commercial “cloud security” scanners that aim to detect malware in clou
 
 This results in the security agent stealing compute cycles and I/O from the host it’s scanning, which is veritably unstonkly – as is the chance that prod is borked if the agent screws up.
 
-#### The inspired way
+### The inspired way
 Patrolaroid avoids these problems by scanning prod instances for security problems while staying safely out of prod. After the engineer or admin provides the ID of the volume they want to scan, Patrolaroid then:
 1.	Runs from an AWS instance within the same account as the specified instance
 2.	Snapshots the specified instance
@@ -34,11 +34,11 @@ Patrolaroid avoids these problems by scanning prod instances for security proble
 In short, Patrolaroid provides "point-and-shoot" malware scanning of AWS instances without the malware-like tactics of existing “cloud security” tools. 
 
 
-## Getting Started
+# Getting Started with Patrolaroid
 
 All you need is an AWS account and the ability to create an AWS role and instance to get Patrolaroid up and running. Getting started involves creating a dedicated EC2 instance for Patrolaroid in the same AWS account and availability zones as the EBS volumes you want to scan.
 
-### Step 1: Create an AWS role
+## Step 1: Create an AWS role
 1. Log into your AWS account and access the Identity and Access Management (IAM) service in the AWS Management Console, then choose [*Create Role*](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-service.html) (you can also use the AWS CLI if you prefer)
 > Make sure to use the account and availability zone you want to scan to create the role
 2. Select *AWS service* for type of trusted entity
@@ -48,7 +48,7 @@ All you need is an AWS account and the ability to create an AWS role and instanc
 6. Type *Patrolaroid* for the *Role name*
 7. Review the role and, if satisfied, choose *Create role*
 
-### Step 2: Create an EC2 instance
+## Step 2: Create an EC2 instance
 > Make sure you’re still logged into the account you want to scan before proceeding
 1. Open the [AWS EC2 console](https://console.aws.amazon.com/ec2/), then choose *Launch instance*
 2. On the Step 1: Choose an Amazon Machine Image (AMI) page, select *Ubuntu Server 20.04 LTS (HVM), SSD Volume Type*
@@ -56,7 +56,7 @@ All you need is an AWS account and the ability to create an AWS role and instanc
 4. For IAM role, select the *Patrolaroid* role you created
 5. Click *Review and Launch*
 
-### Step 3: Install dependencies
+## Step 3: Install dependencies
 1. [Connect to your EC2 instance via SSH](https://docs.aws.amazon.com/quickstarts/latest/vmlaunch/step-2-connect-to-instance.html) (if using Linux or Mac) or PuTTY if using Windows
 2. Install *gcc* and other package dependencies by running the command `sudo apt-get install curl git make gcc build-essential`
 3. Download *golang* by running  `curl -OL [https://golang.org/dl/go1.16.4.linux-amd64.tar.gz](https://golang.org/dl/go1.16.4.linux-amd64.tar.gz)`
@@ -66,11 +66,11 @@ All you need is an AWS account and the ability to create an AWS role and instanc
 	3. echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
 	4. sudo chown -R $USER /go
 
-### Step 4: Install Patrolaroid
+## Step 4: Install Patrolaroid
 1. [Connect to your EC2 instance via SSH](https://docs.aws.amazon.com/quickstarts/latest/vmlaunch/step-2-connect-to-instance.html) (if using Linux or Mac) or PuTTY if using Windows
 2. Clone Patrolaroid to your instance by running `[git clone https://github.com/rpetrich/patrolaroid.git](https://github.com/rpetrich/patrolaroid.git)`
 3. Build Patrolaroid by running `pushd patrolaroid && make && popd`
 
-### Step 5: Run Patrolaroid
+## Step 5: Run Patrolaroid
 1. Navigate to the Patrolaroid directory by running `cd patrolaroid`
 2. Start Patrolaroid by running `sudo ./patrolaroid`
