@@ -11,7 +11,7 @@ Patrolaroid is an instant camera for capturing cloud workload risks. It’s a pr
 Patrolaroid scans production infrastructure from a safe distance rather than within production, so you don’t have to install an agent, run code, or perform other invasive infosec rituals to use it.
 
 ## Overview
-Patrolaroid snapshots AWS instances to uncover malware, backdoors, cryptominers, toolkits, and other attacker tomfoolery that you probably don’t want in your prod. Software engineers, security engineers, and cloud administrators only need familiarity with YARA and the AWS management console to use it. 
+Patrolaroid snapshots AWS instances to uncover malware, backdoors, cryptominers, toolkits, and other attacker tomfoolery that you probably don’t want in your prod. Software engineers, security engineers, and cloud administrators only need familiarity with YARA and the AWS Management Console to use it. 
 
 Patrolaroid does not require running an agent or code in prod and generally avoids the myriad stability and performance sins of security tools. 
 
@@ -19,7 +19,7 @@ Patrolaroid does not require running an agent or code in prod and generally avoi
 ### The tired way
 Most commercial “cloud security” scanners that aim to detect malware in cloud workloads ironically operate pretty similarly to malware. Their mode of operation is:
 1.	Just-in-time installation of an agent via SSH
-2.	Running the agent from /tmp
+2.	Running the agent from `/tmp`
 3.	Deleting themselves once the scan completes
 
 This results in the security agent stealing compute cycles and I/O from the host it’s scanning, which is veritably unstonkly – as is the chance that prod is borked if the agent screws up.
@@ -39,8 +39,8 @@ In short, Patrolaroid provides "point-and-shoot" malware scanning of AWS instanc
 All you need is an AWS account and the ability to create an AWS role and EC2 instance to get Patrolaroid up and running. Getting started involves creating a dedicated EC2 instance for Patrolaroid in the same AWS account and availability zones as the EBS volumes you want to scan.
 
 ## Step 1: Create an AWS role
+:cloud: Make sure to use the account and availability zone you want to scan to create the role :cloud:
 1. Log into your AWS account and access the Identity and Access Management (IAM) service in the AWS Management Console, then choose [**Create Role**](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-service.html) (you can also use the AWS CLI if you prefer)
-:cloud: Make sure to use the account and availability zone you want to scan to create the role
 2. Select **AWS service** for type of trusted entity
 3. Select **EC2** as the allowed service and use case, then choose **Next: Permissions**
 4. Select the [**AmazonEC2FullAccess**](https://console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn%3Aaws%3Aiam%3A%3Aaws%3Apolicy%2FAmazonEC2FullAccess) policy, then choose **Next: Tags**
@@ -49,7 +49,7 @@ All you need is an AWS account and the ability to create an AWS role and EC2 ins
 7. Review the role and, if satisfied, choose **Create role**
 
 ## Step 2: Create an EC2 instance
-:cloud: Make sure you’re still logged into the account you want to scan before proceeding
+:cloud: Make sure you’re still logged into the account you want to scan before proceeding :cloud:
 1. Open the [AWS EC2 console](https://console.aws.amazon.com/ec2/), then choose **Launch instance**
 2. On the Step 1: Choose an Amazon Machine Image (AMI) page, select **Ubuntu Server 20.04 LTS (HVM), SSD Volume Type**
 3. On the Step 2: Choose an Instance Type page, select the **t2.micro** type, then click **Next: Configure Instance Details**
@@ -57,7 +57,7 @@ All you need is an AWS account and the ability to create an AWS role and EC2 ins
 5. Click **Review and Launch**
 
 ## Step 3: Install dependencies
-1. [Connect to your new EC2 instance via SSH](https://docs.aws.amazon.com/quickstarts/latest/vmlaunch/step-2-connect-to-instance.html) (if using Linux or Mac) or PuTTY if using Windows
+1. [Connect to your new EC2 instance via SSH](https://docs.aws.amazon.com/quickstarts/latest/vmlaunch/step-2-connect-to-instance.html) (or PuTTY if using Windows)
 2. Install `gcc` and other package dependencies by running the command:
 ```
 sudo apt-get install curl git make gcc build-essential
@@ -90,3 +90,4 @@ Navigate to the Patrolaroid directory and start it:
 cd patrolaroid
 sudo ./patrolaroid
 ```
+Enjoy your :cloud: :lock: :camera:
