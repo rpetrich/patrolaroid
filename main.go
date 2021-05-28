@@ -57,7 +57,7 @@ func run() int {
 	}
 	instanceId := string(instanceIdBytes)
 	// parse arguments
-	signaturePathFlag := flag.String("signatures", "./signatures", "a path to YARA signatures")
+	signaturePathFlag := flag.String("signatures", "./rules", "a path to YARA signatures")
 	volumeIdsFlag := flag.String("volume-ids", "", "a comma separated list of volume IDs to scan")
 	flag.Parse()
 	// load YARA
