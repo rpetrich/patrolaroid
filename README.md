@@ -13,7 +13,7 @@ Patrolaroid scans production infrastructure from a safe distance rather than wit
 ## Overview
 Patrolaroid snapshots AWS instances to uncover malware, backdoors, cryptominers, toolkits, and other attacker tomfoolery that you probably don’t want in your prod. Software engineers, security engineers, and cloud administrators only need familiarity with YARA and the AWS management console to use it. 
 
-Patrolaroid does not require running an agent or code in prod, only needs read-only access, and generally avoids the myriad stability and performance sins of security tools. 
+Patrolaroid does not require running an agent or code in prod and generally avoids the myriad stability and performance sins of security tools. 
 
 ## Why?
 ### The tired way
@@ -58,11 +58,15 @@ All you need is an AWS account and the ability to create an AWS role and EC2 ins
 
 ## Step 3: Install dependencies
 1. [Connect to your EC2 instance via SSH](https://docs.aws.amazon.com/quickstarts/latest/vmlaunch/step-2-connect-to-instance.html) (if using Linux or Mac) or PuTTY if using Windows
-2. Install **gcc** and other package dependencies by running the command:
-```sudo apt-get install curl git make gcc build-essential```
-3. Download **golang** by running 
-```curl -OL [https://golang.org/dl/go1.16.4.linux-amd64.tar.gz](https://golang.org/dl/go1.16.4.linux-amd64.tar.gz)```
-4. Install golang by running:
+2. Install `gcc` and other package dependencies by running the command:
+```
+sudo apt-get install curl git make gcc build-essential
+```
+3. Download `golang` by running 
+```
+curl -OL [https://golang.org/dl/go1.16.4.linux-amd64.tar.gz](https://golang.org/dl/go1.16.4.linux-amd64.tar.gz)
+```
+4. Install `golang` by running:
 ```
 	sudo bash -c 'rm -rf /usr/local/go && tar -C /usr/local -xzf go1.16.4.linux-amd64.tar.gz'
 	export PATH=$PATH:/usr/local/go/bin
@@ -73,11 +77,17 @@ All you need is an AWS account and the ability to create an AWS role and EC2 ins
 ## Step 4: Install Patrolaroid
 1. [Connect to your EC2 instance via SSH](https://docs.aws.amazon.com/quickstarts/latest/vmlaunch/step-2-connect-to-instance.html) (if using Linux or Mac) or PuTTY if using Windows
 2. Clone Patrolaroid to your instance by running:
-```[git clone https://github.com/rpetrich/patrolaroid.git](https://github.com/rpetrich/patrolaroid.git)```
+```
+[git clone https://github.com/rpetrich/patrolaroid.git](https://github.com/rpetrich/patrolaroid.git)
+```
 3. Build Patrolaroid by running:
-```pushd patrolaroid && make && popd```
+```
+pushd patrolaroid && make && popd
+```
 
 ## Step 5: Run Patrolaroid
 1. Navigate to the Patrolaroid directory and start it by running:
-```cd patrolaroid
-sudo ./patrolaroid```
+```
+cd patrolaroid
+sudo ./patrolaroid
+```
