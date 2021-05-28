@@ -188,7 +188,7 @@ wait_for_snapshot_completion:
 				break wait_for_snapshot_completion
 			case types.SnapshotStatePending:
 				if snapshot.Progress != nil {
-					return fmt.Errorf("snapshot progress: %s", *snapshot.Progress)
+					log.Printf("snapshot progress: %s", *snapshot.Progress)
 				}
 			}
 		}
