@@ -13,7 +13,7 @@ Patrolaroid scans production infrastructure from a safe distance rather than wit
 ## Overview
 Patrolaroid snapshots AWS instances to uncover malware, backdoors, cryptominers, toolkits, and other attacker tomfoolery that you probably don’t want in your prod. Software engineers, security engineers, and cloud administrators only need familiarity with YARA and the AWS Management Console to use it. 
 
-Patrolaroid does not require running an agent or code in prod and generally avoids the myriad stability and performance sins of security tools. 
+Patrolaroid does not require running an agent or code in prod, only needs read-only access to cloud assets, and generally avoids the myriad stability and performance sins of security tools. 
 
 ## Why?
 ### The tired way
