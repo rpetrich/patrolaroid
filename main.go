@@ -195,9 +195,12 @@ wait_for_snapshot_completion:
 		}
 		time.Sleep(10 * time.Second)
 	}
+	iops := int32(3000)
 	createVolumeResponse, err := client.CreateVolume(ctx, &ec2.CreateVolumeInput{
 		AvailabilityZone: &az,
 		SnapshotId:       &snapshotId,
+		Iops:             &iops,
+		VolumeType:       types.VolumeTypeGp3,
 	})
 	if err != nil {
 		return fmt.Errorf("create volume request failed: %v", err)
