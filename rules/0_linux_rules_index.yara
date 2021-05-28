@@ -1,6 +1,6 @@
 /* 
     This is the default ruleset for Patrolaroid, focused on Linux malware, ransomware, backdoors, toolkits, exploits, etc.
-    It uses rules from the following sources:
+    It includes handcrafted rules by @swagitda as well as rules from the following sources:
     	* Deadbits: https://github.com/deadbits/yara-rules
     	* Reversing Labs: https://github.com/reversinglabs/reversinglabs-yara-rules
     	* Yara Rules Project: https://github.com/Yara-Rules/rules/
@@ -20,10 +20,12 @@ include "./Equation_Group_Toolkit_3.yara"
 include "./Erebus_Ransomware.yara"
 include "./EvilGnome_Malware.yara"
 include "./GodLua_Malware.yara"
+include "./GreedyAntd_Malware.yara"
 include "./Helios_Malware.yara"
 include "./KillDisk_Ransomware.yara"
 include "./KORKERDS_Miner.yara"
 include "./Kraken_Ransomware.yara"
+include "./LemonDuck_Miner.yara"
 include "./LuckyJoe_Ransomware.yara"
 include "./Mandibule_Toolkit.yara"
 include "./Mirai_Okiru_Malware.yara"
@@ -33,6 +35,7 @@ include "./Moose_Malware.yara"
 include "./Op_Windigo_Malware.yara"
 include "./Rebirth_Vulcan_Malware.yara"
 include "./RedGhost_Malware.yara"
+include "./Rocke_Group_Toolkit.yara"
 include "./Sofacy_Backdoor.yara"
 include "./TinyShell_Backdoor.yara"
 include "./Thor_Toolkit.yara"
