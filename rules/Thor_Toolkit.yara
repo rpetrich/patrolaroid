@@ -3028,3 +3028,4 @@ rule VSSown_VBS {
 		$s5 = "Win32_Process" ascii
 	condition:
 		all of them
+}

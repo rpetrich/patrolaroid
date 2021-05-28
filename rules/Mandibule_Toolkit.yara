@@ -1,3 +1,12 @@
+private rule is__elf {
+	meta:
+		author = "@mmorenog,@yararules"
+	strings:
+		$header = { 7F 45 4C 46 }
+	condition:
+		$header at 0
+}
+
 /* Source: https://github.com/Yara-Rules/rules/blob/3872244500f584491cde7c633f12f1f043a61c13/malware/TOOLKIT_Mandibule.yar */
 
 /* 		Yara rule to detect ELF Linux process injector toolkit "mandibule" generic.
