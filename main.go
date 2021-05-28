@@ -131,6 +131,7 @@ func run() int {
 			}
 		}
 	}
+	log.Printf("scanning the following volumes: %v", volumeIds)
 	exitCode := 0
 	for _, volumeId := range volumeIds {
 		if err = processVolume(ctx, client, az, instanceId, volumeId, r); err != nil {
