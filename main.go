@@ -20,6 +20,18 @@ import (
 	yara "github.com/capsule8/go-yara"
 )
 
+type volumeInfo struct {
+	VolumeId    string
+	Attachments []string
+}
+
+func (i volumeInfo) String() string {
+	if len(i.Attachments) == 0 {
+		return i.VolumeId
+	}
+	return fmt.Sprintf("%s (attached to %v)", i.VolumeId, strings.Join(i.Attachments, ", "))
+}
+
 func run() int {
 	// load the AWS config
 	ctx := context.Background()
@@ -110,32 +122,39 @@ func run() int {
 	client := ec2.NewFromConfig(cfg)
 	dryRun := false
 	// search for volumes
+	var volumes []volumeInfo
 	var volumeIds []string
 	if *volumeIdsFlag != "" {
 		volumeIds = strings.Split(*volumeIdsFlag, ",")
-	} else {
-		var nextToken *string
-		for {
-			volumes, err := client.DescribeVolumes(ctx, &ec2.DescribeVolumesInput{
-				DryRun:    &dryRun,
-				NextToken: nextToken,
-			})
-			if err != nil {
-				log.Fatalf("describe volumes request failed: %v", err)
+	}
+	var nextToken *string
+	for {
+		volumesOutput, err := client.DescribeVolumes(ctx, &ec2.DescribeVolumesInput{
+			DryRun:    &dryRun,
+			NextToken: nextToken,
+			VolumeIds: volumeIds,
+		})
+		if err != nil {
+			log.Fatalf("describe volumes request failed: %v", err)
+		}
+		for _, volume := range volumesOutput.Volumes {
+			info := volumeInfo{
+				VolumeId: *volume.VolumeId,
 			}
-			for _, volume := range volumes.Volumes {
-				volumeIds = append(volumeIds, *volume.VolumeId)
-				log.Printf("found volume %s", *volume.VolumeId)
+			for _, attachment := range volume.Attachments {
+				info.Attachments = append(info.Attachments, *attachment.InstanceId)
 			}
-			if nextToken = volumes.NextToken; nextToken == nil {
-				break
-			}
+			volumes = append(volumes, info)
+			log.Printf("found volume %s", info.VolumeId)
+		}
+		if nextToken = volumesOutput.NextToken; nextToken == nil {
+			break
 		}
 	}
-	log.Printf("scanning the following volumes: %v", volumeIds)
+	log.Printf("scanning the following volumes: %v", volumes)
 	exitCode := 0
-	for _, volumeId := range volumeIds {
-		if err = processVolume(ctx, client, az, instanceId, volumeId, r); err != nil {
+	for _, volume := range volumes {
+		if err = processVolume(ctx, client, az, instanceId, volume, r); err != nil {
 			log.Printf("%v", err)
 			exitCode = 1
 		}
@@ -143,13 +162,13 @@ func run() int {
 	return exitCode
 }
 
-func processVolume(ctx context.Context, client *ec2.Client, az string, instanceId string, volumeId string, rules *yara.Rules) error {
+func processVolume(ctx context.Context, client *ec2.Client, az string, instanceId string, volumeInfo volumeInfo, rules *yara.Rules) error {
 	// create a snapshot
 	dryRun := false
-	log.Printf("creating new snapshot for %q", volumeId)
-	description := "Patrolaroid temporary snapshot of " + volumeId
+	log.Printf("creating new snapshot for %v", volumeInfo)
+	description := "Patrolaroid temporary snapshot of " + volumeInfo.VolumeId
 	snapshot, err := client.CreateSnapshot(ctx, &ec2.CreateSnapshotInput{
-		VolumeId:    &volumeId,
+		VolumeId:    &volumeInfo.VolumeId,
 		Description: &description,
 		DryRun:      &dryRun,
 	})
@@ -229,7 +248,7 @@ wait_for_volume_completion:
 			return fmt.Errorf("unable to query volumes: %v", err)
 		}
 		if len(descriptions.Volumes) == 0 {
-			return fmt.Errorf("invalid volume id: %q", volumeId)
+			return fmt.Errorf("invalid volume id: %v", volumeInfo)
 		}
 		for _, volume := range descriptions.Volumes {
 			switch volume.State {
@@ -342,13 +361,13 @@ wait_for_volume_completion:
 					// compare by string since go-yara doesn't use structured error
 					// types :(
 					if errorText != "could not open file" && errorText != "could not map file" {
-						log.Printf("could not scan file in volume %s at path %q: %v", volumeId, strings.TrimPrefix(recursivePath, "snapshot"), err)
+						log.Printf("could not scan file in volume %v at path %q: %v", volumeInfo, strings.TrimPrefix(recursivePath, "snapshot"), err)
 					}
 				} else {
 					// If we have matches, dispatch an alert
 					if len(m) != 0 {
 						for _, match := range m {
-							log.Printf("file in volume %s at path %q violated rule %q from %q", volumeId, strings.TrimPrefix(recursivePath, "snapshot"), match.Rule, match.Namespace)
+							log.Printf("file in volume %v at path %q violated rule %q from %q", volumeInfo, strings.TrimPrefix(recursivePath, "snapshot"), match.Rule, match.Namespace)
 						}
 					}
 				}
