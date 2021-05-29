@@ -64,14 +64,14 @@ sudo apt-get install curl
 ```
 
 ## Step 4: Install Patrolaroid
-Ensure you are connected to your dedicated EC2 instance and then download Patrolaroid to it:
+Ensure you are connected to your dedicated EC2 instance and then download Patrolaroid to it by running:
 ```
 curl -L https://github.com/rpetrich/patrolaroid/releases/download/v0.2/patrolaroid.tar.gz | tar xz
 ```
 
 ## Step 5: Run Patrolaroid
-Start it via `sudo`:
+Start scanning by running Patrolaroid via `sudo`:
 ```
 sudo ./patrolaroid
 ```
-Enjoy your :cloud: :lock: :camera:
+Enjoy your :cloud: :lock: :camera: :black_heart:
