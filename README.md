@@ -61,6 +61,7 @@ All you need is an AWS account and the ability to create an AWS role and EC2 ins
 2. Install `curl` by running the command:
 ```
 sudo apt-get install curl
+```
 
 ## Step 4: Install Patrolaroid
 Ensure you are connected to your dedicated EC2 instance and then download Patrolaroid to it:
