@@ -1,6 +1,6 @@
 # Recommended AWS IAM policy
 
-For individuals more comfortable applying [custom IAM policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html) in AWS, we recommend using the below IAM policy instead of `AmazonEC2FullAccess` when creating the AWS role for Patrolaroid. 
+For individuals comfortable applying [custom IAM policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html) in AWS, we recommend using the below IAM policy instead of `AmazonEC2FullAccess` when creating the AWS role for Patrolaroid. 
 
 ```
 {
