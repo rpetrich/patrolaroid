@@ -15,7 +15,10 @@ For individuals comfortable applying [custom IAM policies](https://docs.aws.amaz
         "ec2:DeleteVolume",
         "ec2:DescribeSnapshots",
         "ec2:DescribeVolumes",
-        "ec2:DetachVolume"
+        "ec2:DetachVolume",
+        "s3:ListBuckets",
+        "s3:ListObjects",
+        "s3:GetObject"
       ],
       "Effect": "Allow",
       "Resource": "*"
