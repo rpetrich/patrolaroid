@@ -66,7 +66,7 @@ sudo apt-get install curl
 ## Step 4: Install Patrolaroid
 Ensure you are connected to your dedicated EC2 instance and then download Patrolaroid to it by running:
 ```
-curl -L https://github.com/rpetrich/patrolaroid/releases/download/v0.2/patrolaroid.tar.gz | tar xz
+curl -L https://github.com/rpetrich/patrolaroid/releases/download/v0.3/patrolaroid.tar.gz | tar xz
 ```
 
 ## Step 5: Run Patrolaroid
