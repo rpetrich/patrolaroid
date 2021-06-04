@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -17,6 +18,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	yara "github.com/capsule8/go-yara"
 )
 
@@ -71,7 +73,8 @@ func run() int {
 	instanceId := string(instanceIdBytes)
 	// parse arguments
 	signaturePathFlag := flag.String("signatures", "./rules", "a path to YARA signatures")
-	volumeIdsFlag := flag.String("volume-ids", "", "a comma separated list of volume IDs to scan")
+	volumeIdsFlag := flag.String("volume-ids", "all", "a comma separated list of volume IDs to scan")
+	bucketIdsFlag := flag.String("bucket-ids", "all", "a comma separated list of bucket IDs to scan")
 	flag.Parse()
 	// load YARA
 	compiler, err := yara.NewCompiler()
@@ -118,45 +121,72 @@ func run() int {
 	if ruleCount == 0 {
 		log.Fatalf("no rules to scan files with; place signatures in ./signatures/*.yar")
 	}
-	// connect to EC2
-	client := ec2.NewFromConfig(cfg)
+	exitCode := 0
 	dryRun := false
 	// search for volumes
-	var volumes []volumeInfo
-	var volumeIds []string
 	if *volumeIdsFlag != "" {
-		volumeIds = strings.Split(*volumeIdsFlag, ",")
-	}
-	var nextToken *string
-	for {
-		volumesOutput, err := client.DescribeVolumes(ctx, &ec2.DescribeVolumesInput{
-			DryRun:    &dryRun,
-			NextToken: nextToken,
-			VolumeIds: volumeIds,
-		})
-		if err != nil {
-			log.Fatalf("describe volumes request failed: %v", err)
+		var volumes []volumeInfo
+		var volumeIds []string
+		if *volumeIdsFlag != "all" {
+			volumeIds = strings.Split(*volumeIdsFlag, ",")
 		}
-		for _, volume := range volumesOutput.Volumes {
-			info := volumeInfo{
-				VolumeId: *volume.VolumeId,
+		// connect to EC2
+		client := ec2.NewFromConfig(cfg)
+		var nextToken *string
+		for {
+			volumesOutput, err := client.DescribeVolumes(ctx, &ec2.DescribeVolumesInput{
+				DryRun:    &dryRun,
+				NextToken: nextToken,
+				VolumeIds: volumeIds,
+			})
+			if err != nil {
+				log.Fatalf("describe volumes request failed: %v", err)
 			}
-			for _, attachment := range volume.Attachments {
-				info.Attachments = append(info.Attachments, *attachment.InstanceId)
+			for _, volume := range volumesOutput.Volumes {
+				info := volumeInfo{
+					VolumeId: *volume.VolumeId,
+				}
+				for _, attachment := range volume.Attachments {
+					info.Attachments = append(info.Attachments, *attachment.InstanceId)
+				}
+				volumes = append(volumes, info)
+				log.Printf("found volume %s", info.VolumeId)
 			}
-			volumes = append(volumes, info)
-			log.Printf("found volume %s", info.VolumeId)
+			if nextToken = volumesOutput.NextToken; nextToken == nil {
+				break
+			}
 		}
-		if nextToken = volumesOutput.NextToken; nextToken == nil {
-			break
+		log.Printf("scanning the following volumes: %v", volumes)
+		for _, volume := range volumes {
+			if err = processVolume(ctx, client, az, instanceId, volume, r); err != nil {
+				log.Printf("%v", err)
+				exitCode = 1
+			}
 		}
+	} else {
+		log.Printf("skipping scanning volumes, none specified")
 	}
-	log.Printf("scanning the following volumes: %v", volumes)
-	exitCode := 0
-	for _, volume := range volumes {
-		if err = processVolume(ctx, client, az, instanceId, volume, r); err != nil {
-			log.Printf("%v", err)
-			exitCode = 1
+	if *bucketIdsFlag != "" {
+		var bucketIds []string
+		client := s3.NewFromConfig(cfg)
+		if *bucketIdsFlag != "all" {
+			bucketIds = strings.Split(*bucketIdsFlag, ",")
+		} else {
+			// connect to S3
+			bucketsOutput, err := client.ListBuckets(ctx, &s3.ListBucketsInput{})
+			if err != nil {
+				log.Fatalf("list buckets request failed: %v", err)
+			}
+			for _, bucket := range bucketsOutput.Buckets {
+				bucketIds = append(bucketIds, *bucket.Name)
+			}
+		}
+		log.Printf("scanning the following buckets: %v", bucketIds)
+		for _, bucket := range bucketIds {
+			if err = processBucket(ctx, client, bucket, r); err != nil {
+				log.Printf("%v", err)
+				exitCode = 1
+			}
 		}
 	}
 	return exitCode
@@ -452,10 +482,120 @@ wait_for_volume_detachment:
 	_, err = client.DeleteVolume(ctx, &ec2.DeleteVolumeInput{
 		VolumeId: &snapshotVolumeId,
 	})
+	log.Printf("finished scanning %v", volumeInfo)
 	if err != nil {
 		return fmt.Errorf("delete volume request failed: %v", err)
 	}
 	return errorToReturn
+}
+
+type s3MemoryIterator struct {
+	ctx      context.Context
+	client   *s3.Client
+	bucketId string
+	key      string
+	size     int64
+	offset   int64
+	err      error
+}
+
+func (i *s3MemoryIterator) First() *yara.MemoryBlock {
+	i.offset = 0
+	return i.Next()
+}
+
+func (i *s3MemoryIterator) Next() *yara.MemoryBlock {
+	base := i.offset
+	chunkSize := i.size - base
+	if chunkSize == 0 {
+		return nil
+	}
+	if chunkSize > 2*1024*1024 {
+		chunkSize = 2 * 1024 * 1024
+	}
+	i.offset += chunkSize
+	return &yara.MemoryBlock{
+		Base: uint64(base),
+		Size: uint64(chunkSize),
+		FetchData: func(buf []byte) {
+			rangeString := fmt.Sprintf("bytes=%d-%d", base, base+chunkSize)
+			output, err := i.client.GetObject(i.ctx, &s3.GetObjectInput{
+				Bucket: &i.bucketId,
+				Key:    &i.key,
+				Range:  &rangeString,
+			})
+			if err != nil {
+				i.err = err
+			} else {
+				body := output.Body
+				defer body.Close()
+				for len(buf) > 0 {
+					var n int
+					n, err = body.Read(buf)
+					buf = buf[n:]
+					if err != nil {
+						if err != io.EOF {
+							i.err = err
+						}
+						break
+					}
+				}
+			}
+		},
+	}
+}
+
+func processBucket(ctx context.Context, client *s3.Client, bucketId string, rules *yara.Rules) error {
+	var wg sync.WaitGroup
+	pathsToScan := make(chan *s3MemoryIterator, 1024)
+	for i := 0; i < 64; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for iterator := range pathsToScan {
+				// Actually scan the file
+				var m yara.MatchRules
+				if err := rules.ScanMemBlocks(iterator, 0, 0, &m); err != nil {
+					log.Printf("could not scan file in bucket %s at path %q: %v", bucketId, iterator.key, err)
+				} else if iterator.err != nil {
+					log.Printf("could not scan file in bucket %s at path %q: %v", bucketId, iterator.key, iterator.err)
+				} else {
+					// If we have matches, dispatch an alert
+					if len(m) != 0 {
+						for _, match := range m {
+							log.Printf("file in bucket %s at path %q violated rule %q from %q", bucketId, iterator.key, match.Rule, match.Namespace)
+						}
+					}
+				}
+			}
+		}()
+	}
+	log.Printf("scanning bucket %s", bucketId)
+	var continuationToken *string
+	for {
+		listObjectsOutput, err := client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+			Bucket: &bucketId,
+		})
+		if err != nil {
+			log.Fatalf("describe volumes request failed: %v", err)
+		}
+		for _, object := range listObjectsOutput.Contents {
+			pathsToScan <- &s3MemoryIterator{
+				ctx:      ctx,
+				client:   client,
+				bucketId: bucketId,
+				key:      *object.Key,
+				size:     object.Size,
+			}
+		}
+		if continuationToken = listObjectsOutput.NextContinuationToken; continuationToken == nil {
+			break
+		}
+	}
+	close(pathsToScan)
+	wg.Wait()
+	log.Printf("finished scanning %s", bucketId)
+	return nil
 }
 
 func main() {
