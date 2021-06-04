@@ -6,12 +6,12 @@
 
 <br/>
 
-Patrolaroid is an instant camera for capturing cloud workload risks. It’s a prod-friendly scanner that makes finding security issues in AWS instances less annoying and disruptive for software engineers and cloud admins. 
+Patrolaroid is an instant camera for capturing cloud workload risks. It’s a prod-friendly scanner that makes finding security issues in AWS instances and buckets less annoying and disruptive for software engineers and cloud admins. 
 
 Patrolaroid scans production infrastructure from a safe distance rather than within production, so you don’t have to install an agent, run code, or perform other invasive infosec rituals to use it.
 
 ## Overview
-Patrolaroid snapshots AWS instances to uncover malware, backdoors, cryptominers, toolkits, and other attacker tomfoolery that you probably don’t want in your prod. Software engineers, security engineers, and cloud administrators only need familiarity with YARA and the AWS Management Console to use it. 
+Patrolaroid snapshots AWS instances and buckets to uncover malware, backdoors, cryptominers, toolkits, and other attacker tomfoolery that you probably don’t want in your prod. Software engineers, security engineers, and cloud administrators only need familiarity with YARA and the AWS Management Console to use it. 
 
 Patrolaroid does not require running an agent or code in prod, only needs read-only access to cloud assets, and generally avoids the myriad stability and performance sins of security tools. 
 
@@ -25,18 +25,18 @@ Most commercial “cloud security” scanners that aim to detect malware in clou
 This results in the security agent stealing compute cycles and I/O from the host it’s scanning, which is veritably unstonkly – as is the chance that prod is borked if the agent screws up.
 
 ### The inspired way
-Patrolaroid avoids these problems by scanning prod instances for security problems while staying safely out of prod. After the engineer or admin identifies the AWS account containing the instances they want to scan, Patrolaroid then:
-1.	Runs from an AWS instance within the same account as the target instances
+Patrolaroid avoids these problems by scanning prod instances and buckets for security problems while staying safely out of prod. After the engineer or admin identifies the AWS account containing the resources they want to scan, Patrolaroid then:
+1.	Runs from an AWS instance within the same account as the target instances or buckets
 2.	Snapshots each instance
 3.	Uses [YARA rules](https://github.com/rpetrich/patrolaroid/tree/main/rules) to scan the instance’s filesystem for matches (and generates an alert if there is a match)
 4.	Deletes the snapshot volume
 
-In short, Patrolaroid provides "point-and-shoot" malware scanning of AWS instances without the malware-like tactics of existing “cloud security” tools. 
+In short, Patrolaroid provides "point-and-shoot" malware scanning of AWS assets without the malware-like tactics of existing “cloud security” tools. 
 
 
 # Getting Started with Patrolaroid
 
-All you need is an AWS account and the ability to create an AWS role and EC2 instance to get Patrolaroid up and running. Getting started involves creating a dedicated EC2 instance for Patrolaroid in the same AWS account and availability zones as the EBS volumes you want to scan.
+All you need is an AWS account and the ability to create an AWS role and EC2 instance to get Patrolaroid up and running. Getting started involves creating a dedicated EC2 instance for Patrolaroid in the same AWS account and availability zones as the assets you want to scan.
 
 ## Step 1: Create an AWS role
 :cloud: Make sure to use the account and availability zone you want to scan to create the role :cloud:
