@@ -75,3 +75,9 @@ Start scanning by running Patrolaroid via `sudo`:
 sudo ./patrolaroid
 ```
 Enjoy your :cloud: :lock: :camera: :black_heart:
+
+***
+
+## Compatibility Caveats
+
+Patrolaroid is not compatible with instances launched from a **paid** AWS Marketplace image (i.e. it works as long as there is no image fee). AWS restricts the ability to attach paid-image-instance snapshots to other instances (by design, since otherwise users could bypass the marketplace fee).
